@@ -1,3 +1,5 @@
+**HashCat Multiple Dictionaries and Multiple Host Cluster**
+
 This python script distribute the multiple dictionaries to multiple host for decrypting the hash using hashcat.
 
 For Example,
@@ -26,4 +28,6 @@ What this command will do is,
 
 
 About hashcat command input,
-The user should not include the input and dictionary file in hashcat command. The script will automatically add those file.
+- The user should not include the input and dictionary file in hashcat command. The script will automatically add those file.
+- The user should not change the output format of hashcat command.
+- User either can add --status and --status-timer argument, If they like to know the progress, Otherwise script will not be able to pull the progress.
