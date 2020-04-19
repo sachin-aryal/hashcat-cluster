@@ -27,7 +27,7 @@ What this command will do is,
 6. If any of the hash is recovered(decrypted) then It will pull the result from those hosts.
 
 
-About hashcat command input,
+About hashcat command input => `hashcat -a 0 -m 2500 --status --status-timer=20`
 - The user should not include the input and dictionary file in hashcat command. The script will automatically add those file.
 - The user should not change the output format of hashcat command.
-- User either can add --status and --status-timer argument, If they like to know the progress, Otherwise script will not be able to pull the progress.
+- User either can add --status and --status-timer argument, If they like to know the progress between some interval of time.
