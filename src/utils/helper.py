@@ -1,14 +1,13 @@
 import logging.handlers
 import sys
 import os
-import argparse
 import re
 import json
 
 
 def initialize(logger):
     logger.setLevel(logging.INFO)
-    file_handler = logging.handlers.RotatingFileHandler("info.log", mode="w", maxBytes=1000000, backupCount=20)
+    file_handler = logging.handlers.RotatingFileHandler("hash_cluster.log", mode="w", maxBytes=1000000, backupCount=20)
     console_handler = logging.StreamHandler(sys.stdout)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
@@ -18,16 +17,6 @@ def initialize(logger):
 
     if not os.path.exists("OUTPUT"):
         os.mkdir("OUTPUT")
-
-
-def parse_argument():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('-i', '--input_file', help="Input Json File", required=True, type=str)
-    parser.add_argument('-b', '--in_background', help="Should the process be started in background", required=False, type=bool,
-                        default=False)
-    args = parser.parse_args()
-    return args
 
 
 def write_output(filename, output, mode="w"):

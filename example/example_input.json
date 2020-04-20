@@ -1,0 +1,38 @@
+{
+  "global": {
+    "user": "admin",
+    "hashcat_command": "hashcat -a 0 -m 2500 --status --status-timer=20",
+    "ssh_key_filepath": "/Users/your_user/.ssh/id_rsa",
+    "input_file": "omnamashiva.hccapx"
+  },
+  "hosts": [
+    {
+      "ip": "192.168.0.100",
+      "dictionary": "nepali-name-suffix-8+.txt"
+    },
+    {
+      "ip": "192.168.0.105",
+      "user": "support",
+      "dictionary": "wordlist-probable.txt",
+      "ssh_key_filepath": "/Users/your_user/.ssh/support/id_rsa",
+      "hashcat_command": "hashcat -a 0 -m 2500 --status --status-timer=60"
+    },
+    {
+      "ip": "192.168.0.101",
+      "dictionary": "nepali-name-suffix-8+.txt"
+    },
+    {
+      "ip": "192.168.0.102",
+      "dictionary": "custom-wordlist.txt"
+    },
+    {
+      "ip": "192.168.0.104",
+      "dictionary": "rockyou.txt"
+    },
+    {
+      "ip": "CURRENT",
+      "hashcat_command": "hashcat -a 0 -m 2500 --status --status-timer=5",
+      "dictionary": "small-size.txt"
+    }
+  ]
+}

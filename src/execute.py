@@ -4,8 +4,8 @@ import uuid
 import time
 import subprocess
 from shlex import split as shlex_split
-from utils.client import RemoteClient
-from utils.helper import *
+from src.utils.client import RemoteClient
+from src.utils.helper import *
 from threading import Thread
 
 
@@ -14,7 +14,7 @@ logger = logging.getLogger("Logger")
 PROCESS_STATUS = {}
 
 
-def execute_in_current_machine(input_file_path, dictionary_file_path, hashcat_command):
+def __execute_in_current_machine(input_file_path, dictionary_file_path, hashcat_command):
     dictionary_file = os.path.basename(dictionary_file_path)
     PROCESS_STATUS[f"CURRENT_{dictionary_file}"] = "Started"
     input_file_name = os.path.basename(input_file_path)
@@ -49,7 +49,7 @@ def execute_in_current_machine(input_file_path, dictionary_file_path, hashcat_co
         PROCESS_STATUS[f"CURRENT_{dictionary_file}"] = "Error"
 
 
-def execute_in_node(host, user, ssh_key_filepath, input_file_path, dictionary_file_path, hashcat_command):
+def __execute_in_node(host, user, ssh_key_filepath, input_file_path, dictionary_file_path, hashcat_command):
     remote_directory = remote = None
     try:
         PROCESS_STATUS[host] = "Started"
@@ -102,27 +102,23 @@ def execute_in_node(host, user, ssh_key_filepath, input_file_path, dictionary_fi
     finalize(remote_directory, remote)
 
 
-def main():
-    arguments = parse_argument()
-    if not is_file_exist(arguments.input_file):
-        print("input file not found.")
-        return
+def execute(input_file):
     initialize(logger=logger)
     try:
-        formatted_data = read_input_file(arguments.input_file)
+        formatted_data = read_input_file(input_file)
     except Exception as ex:
         logger.error(str(ex))
         return
     for each_data in formatted_data:
         if each_data["host"] == "CURRENT":
-            target = execute_in_current_machine
+            target = __execute_in_current_machine
             args = [
                 each_data["input_file"],
                 each_data["dictionary"],
                 each_data["hashcat_command"]
             ]
         else:
-            target = execute_in_node
+            target = __execute_in_node
             args = [
                 each_data["host"],
                 each_data["user"],
@@ -139,7 +135,3 @@ def main():
         if "Started" not in PROCESS_STATUS.values():
             break
         time.sleep(20)
-
-
-if __name__ == '__main__':
-    main()

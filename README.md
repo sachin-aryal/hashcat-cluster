@@ -80,7 +80,7 @@ We create input.json file such as
 
 **To start the process, we execute the command with input.json file as argument.**
 
-`python command.py --input_file input.json`
+`python hashcat_cluster.py --input_file input.json`
 
 
 ### What this command will do is,
