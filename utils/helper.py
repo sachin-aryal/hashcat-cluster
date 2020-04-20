@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 import re
+import json
 
 
 def initialize(logger):
@@ -22,18 +23,9 @@ def initialize(logger):
 def parse_argument():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-hs', '--hosts', nargs='+', help="list of working hosts. ", required=True, type=str)
-    parser.add_argument('-u', '--users', nargs='+', help="list of host users in same order as host.", required=True,
-                        type=str)
-    parser.add_argument('-s', '--ssh_key_filepath', help="path of current machine's private key.", required=True,
-                        type=str)
-    parser.add_argument('-i', '--input_file', help="Path of input file.", required=True, type=str)
-    parser.add_argument('-w', '--word_list', nargs='+', help="path of list of word dictionary.", required=True,
-                        type=str)
-    parser.add_argument('-hc', '--hashcat_command', help="hashcat command without input and word dictionary parameter",
-                        required=True, type=str)
-    parser.add_argument('-us', '--use_self', help="use the current machine for processing.",
-                        required=False, type=bool, default=False)
+    parser.add_argument('-i', '--input_file', help="Input Json File", required=True, type=str)
+    parser.add_argument('-b', '--in_background', help="Should the process be started in background", required=False, type=bool,
+                        default=False)
     args = parser.parse_args()
     return args
 
@@ -58,17 +50,57 @@ def finalize(remote_directory, remote):
     This will delete the temporary path in remote and disconnect the ssh client.
     """
     try:
-        delete_temp_directory = "rm -rf {}".format(remote_directory)
-        remote.execute_commands([delete_temp_directory])
-        remote.disconnect()
+        if remote and remote_directory:
+            delete_temp_directory = "rm -rf {}".format(remote_directory)
+            remote.execute_commands([delete_temp_directory])
+            remote.disconnect()
     except:
         pass
 
 
 def is_hash_recovered(out):
-    recovered_count = re.findall(r'Recovered.*:\s([\d]+).*', out)
-    if len(recovered_count) > 0:
-        count = int(recovered_count[0])
-        if count == 0:
-            return False
-    return True
+    recovered_count = re.findall(r'Recovered\.*:\s([\d]+).*', out)
+    if len(recovered_count) > 0 and int(recovered_count[0]) > 0:
+        return True
+    return False
+
+
+def is_file_exist(filepath):
+    if os.path.exists(filepath):
+        return True
+    return False
+
+
+def check_if_all_fields_are_available(formatted_data):
+    for each_row in formatted_data:
+        if None in each_row.values():
+            raise Exception(f"Input error in row={each_row}")
+
+        if not is_file_exist(each_row["input_file"]):
+            raise Exception(f"input file not found: {each_row['input_file']} for host={each_row['host']}")
+        if not is_file_exist(each_row["dictionary"]):
+            raise Exception(f"dictionary file not found: {each_row['dictionary']} for host={each_row['host']}")
+        if not is_file_exist(each_row["ssh_key_filepath"]):
+            raise Exception(f"ssh_key_filepath file not found: {each_row['ssh_key_filepath']} for host={each_row['host']}")
+
+
+def read_input_file(input_file):
+    with open(input_file) as fh:
+        data = json.load(fh)
+
+    formatted_data = []
+    global_data = data["global"]
+    hosts = data["hosts"]
+    for each_host in hosts:
+        formatted_data.append(
+            {
+                "host": each_host["ip"],
+                "user": each_host.get("user") or global_data.get("user"),
+                "ssh_key_filepath": each_host.get("ssh_key_filepath") or global_data.get("ssh_key_filepath"),
+                "input_file": each_host.get("input_file") or global_data.get("input_file"),
+                "dictionary": each_host.get("dictionary"),
+                "hashcat_command": each_host.get("hashcat_command") or global_data.get("hashcat_command"),
+            }
+        )
+    check_if_all_fields_are_available(formatted_data=formatted_data)
+    return formatted_data
