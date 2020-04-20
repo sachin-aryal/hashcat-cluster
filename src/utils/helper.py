@@ -39,7 +39,7 @@ def finalize(remote_directory, remote):
     This will delete the temporary path in remote and disconnect the ssh client.
     """
     try:
-        if remote and remote_directory:
+        if remote and remote.conn and remote_directory:
             delete_temp_directory = "rm -rf {}".format(remote_directory)
             remote.execute_commands([delete_temp_directory])
             remote.disconnect()

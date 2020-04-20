@@ -39,12 +39,12 @@ def __execute_in_current_machine(input_file_path, dictionary_file_path, hashcat_
                     logger.info(f"process completed in Host=CURRENT, Input File={input_file_name},"
                                 f" Dictionary File={dictionary_file}, OUTPUT File={result_file}, RESULT=Hash Recovered")
             else:
+                output = ["------------------------No Result Found----------------------"]
+                write_output(result_file, output, mode="a")
                 logger.info(f"process completed in Host=CURRENT, Input File={input_file_name},"
                             f" Dictionary File={dictionary_file}, OUTPUT File={result_file}, RESULT=Hash not Recovered")
         PROCESS_STATUS[f"CURRENT_{dictionary_file}"] = "Completed"
     except Exception as ex:
-        import traceback
-        traceback.print_exc()
         logger.error(f"error={str(ex)}")
         PROCESS_STATUS[f"CURRENT_{dictionary_file}"] = "Error"
 
@@ -79,12 +79,18 @@ def __execute_in_node(host, user, ssh_key_filepath, input_file_path, dictionary_
         It will get the last 19 lines of out.log created by above command in remote and write to local output file.
         """
         result_file = f"{host}_{input_file_name}_{dictionary_file}.result"
+        retry_count = 0
         while True:
             time.sleep(20)
             output = remote.execute_commands([f"tail -n 19 {remote_directory}/out.log"])
             out = write_output(result_file, output)
-            if "Stopped" in str(output[-1]).strip():
-                # If the last line contains the Stopped string, It means the process has finished.
+            if len(out) > 0:
+                if "Stopped" in str(out[-1]).strip():
+                    # If the last line contains the Stopped string, It means the process has finished.
+                    break
+            else:
+                retry_count += 1
+            if retry_count > 20:
                 break
         if is_hash_recovered(out):
             output = remote.execute_commands([f"cd {remote_directory} && {hashcat_command} --show"])
@@ -93,10 +99,14 @@ def __execute_in_node(host, user, ssh_key_filepath, input_file_path, dictionary_
             logger.info(f"process completed in Host={host}, Input File={input_file_name},"
                         f" Dictionary File={dictionary_file}, OUTPUT File={result_file}, RESULT=Hash Recovered")
         else:
+            output = ["------------------------No Result Found----------------------"]
+            write_output(result_file, output, mode="a")
             logger.info(f"process completed in Host={host}, Input File={input_file_name},"
                         f" Dictionary File={dictionary_file}, OUTPUT File={result_file}, RESULT=Hash not Recovered")
         PROCESS_STATUS[host] = "Completed"
     except Exception as ex:
+        import traceback
+        traceback.print_exc()
         PROCESS_STATUS[host] = "Error"
         logger.error(f"error={str(ex)}")
     finalize(remote_directory, remote)

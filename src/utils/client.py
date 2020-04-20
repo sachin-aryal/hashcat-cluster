@@ -17,7 +17,6 @@ class RemoteClient:
         self.scp = None
         self.conn = None
         self.logger = logger
-        # self._upload_ssh_key()
 
     def _get_ssh_key(self):
         """
@@ -29,14 +28,6 @@ class RemoteClient:
         except SSHException as error:
             self.logger.error(error)
         return self.ssh_key
-
-    def _upload_ssh_key(self):
-        try:
-            system(f'ssh-copy-id -i {self.ssh_key_filepath} {self.user}@{self.host}>/dev/null 2>&1')
-            system(f'ssh-copy-id -i {self.ssh_key_filepath}.pub {self.user}@{self.host}>/dev/null 2>&1')
-            self.logger.debug(f'{self.ssh_key_filepath} uploaded to {self.host}')
-        except FileNotFoundError as error:
-            self.logger.error(error)
 
     def _connect(self):
         """
