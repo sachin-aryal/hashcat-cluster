@@ -64,18 +64,18 @@ We create input.json file such as
 
 ### About the Input Format
 
-1. global: This should contain
+1. ***global***: This should contain
     - USER: The user for ssh access in the nodes.
     - HASHCAT COMMAND: The hashcat command.(It should not contain the input hash file and dictionary, and also the 
     output format of the hashcat command should not be changed.)
     - SSH KEY FILE PATH: SSH identity file path.
     - HASH INPUT FILE PATH: A single input hash file path.
     
-2. hosts:
+2. ***hosts***:
     - This contains the list of nodes where hashcat process will run.<br>
-    - In each of the row inside *hosts*, the ip and dictionary file are mandatory. If other fields are missing then, 
+    - In each of the row inside ***hosts***, the **ip** and **dictionary** fields are mandatory. If other fields are missing then, 
     It will update them from the global.
-    - We can also execute the commands in current machine, We just need to assign *CURRENT* in the ip field
+    - We can also execute the commands in current machine, We just need to assign **CURRENT** in the **ip** field
 
 
 **To start the process, we execute the command with input.json file as argument.**
