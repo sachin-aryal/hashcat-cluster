@@ -4,8 +4,8 @@
 
 ### Problem
 
-- We can have multiple servers available that are free. 
-- We need to run different hash file with different dictionary in those servers.
+- We can have multiple servers that are free, where we can crack some hash. 
+- We need to run different hash files with different dictionaries in those servers.
 - Its really troublesome to every time going to each server and starting the process.
 
 ### Solution
