@@ -8,8 +8,7 @@
 - We need to run different hash file with different dictionary in those servers.
 - Its really troublesome to every time going to each server and executing starting the process.
 
-
-###Solution
+### Solution
 
 - We can create a input.json file as shown in the example below.
 - Then execute the command with the input.json file.
@@ -18,7 +17,7 @@
 
 
 
-For Example,
+### Example
 
 We create input.json file such as 
 
@@ -63,7 +62,7 @@ We create input.json file such as
 }
 ```
 
-About the Input Format
+### About the Input Format
 
 1. global: This should contain
     - USER: The user for ssh access in the nodes.
@@ -84,7 +83,7 @@ About the Input Format
 `python command.py --input_file input.json`
 
 
-###What this command will do is,
+### What this command will do is,
 1. Connect to all the  hosts parallelly using ssh.
 2. Create temporary directory in every host.
 3. Copy input file and the assigned dictionary file to temporary location using scp.
@@ -95,7 +94,7 @@ About the Input Format
 
 
 
-###Hashcat Command 
+### Hashcat Command 
 
 `hashcat -a 0 -m 2500 --status --status-timer=20`
 - The user should not include the input and dictionary file in hashcat command. The script will automatically add those file.
@@ -103,7 +102,7 @@ About the Input Format
 - User either can add --status and --status-timer argument, If they like to know the progress between some interval of time.
 
 
-###Result File
+### Result File
 
 - Result of every process will be inside the OUTPUT Folder.
 - The format of the result file is `{host}_{input_file_name}_{dictionary_file}.result`
