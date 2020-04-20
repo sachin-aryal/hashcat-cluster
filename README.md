@@ -100,7 +100,7 @@ We create input.json file such as
 
 - The user should not include the input and dictionary file in hashcat command. The script will automatically add those file.
 - The user should not change the output format of hashcat command.
-- User either can add --status and --status-timer argument, If they like to know the progress between some interval of time.
+- User can add **--status** and **--status-timer** argument, If they like to know the progress between some interval of time.
 
 
 ### Result File
