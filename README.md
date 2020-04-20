@@ -96,7 +96,7 @@ We create input.json file such as
 
 ### Hashcat Command 
 
-**User can change the command according to their need. But there are certain things that we need to remember. **
+**User can change the command according to their need. But there are certain things that we need to remember.**
 
 - The user should not include the input and dictionary file in hashcat command. The script will automatically add those file.
 - The user should not change the output format of hashcat command.
