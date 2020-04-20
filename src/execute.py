@@ -21,6 +21,7 @@ def __execute_in_current_machine(input_file_path, dictionary_file_path, hashcat_
     try:
         hashcat_command = hashcat_command + f" {input_file_path} {dictionary_file_path}"
         result_file = f"CURRENT_{input_file_name}_{dictionary_file}.result"
+        logger.info(f"Executing hashcat command {hashcat_command}, HOST=CURRENT")
         sp_hashcat_cmd = shlex_split(hashcat_command)
         with open(f"OUTPUT/{result_file}", "w") as rf:
             subprocess.Popen(sp_hashcat_cmd, stdout=rf).communicate()
@@ -34,12 +35,14 @@ def __execute_in_current_machine(input_file_path, dictionary_file_path, hashcat_
                 output, err = proc.communicate()
                 if output:
                     output = str(output).splitlines()
-                    output.insert(0, "------------------------Output----------------------")
+                    output.insert(0, f"\n\nCOMMAND: {hashcat_command}")
+                    output.insert(1, "------------------------Output----------------------")
                     write_output(result_file, output, mode="a")
                     logger.info(f"process completed in Host=CURRENT, Input File={input_file_name},"
                                 f" Dictionary File={dictionary_file}, OUTPUT File={result_file}, RESULT=Hash Recovered")
             else:
-                output = ["------------------------No Result Found----------------------"]
+                output = [f"\n\nCOMMAND: {hashcat_command}",
+                          "------------------------No Result Found----------------------"]
                 write_output(result_file, output, mode="a")
                 logger.info(f"process completed in Host=CURRENT, Input File={input_file_name},"
                             f" Dictionary File={dictionary_file}, OUTPUT File={result_file}, RESULT=Hash not Recovered")
@@ -84,8 +87,8 @@ def __execute_in_node(host, user, ssh_key_filepath, input_file_path, dictionary_
             time.sleep(20)
             output = remote.execute_commands([f"tail -n 19 {remote_directory}/out.log"])
             out = write_output(result_file, output)
-            if len(out) > 0:
-                if "Stopped" in str(out[-1]).strip():
+            if len(output) > 0:
+                if "Stopped" in str(output[-1]).strip():
                     # If the last line contains the Stopped string, It means the process has finished.
                     break
             else:
@@ -94,19 +97,19 @@ def __execute_in_node(host, user, ssh_key_filepath, input_file_path, dictionary_
                 break
         if is_hash_recovered(out):
             output = remote.execute_commands([f"cd {remote_directory} && {hashcat_command} --show"])
-            output.insert(0, "------------------------Output----------------------")
+            output.insert(0, f"\n\nCOMMAND: {hashcat_command}")
+            output.insert(1, "------------------------Output----------------------")
             write_output(result_file, output, mode="a")
             logger.info(f"process completed in Host={host}, Input File={input_file_name},"
                         f" Dictionary File={dictionary_file}, OUTPUT File={result_file}, RESULT=Hash Recovered")
         else:
-            output = ["------------------------No Result Found----------------------"]
+            output = [f"\n\nCOMMAND: {hashcat_command}",
+                      "------------------------No Result Found----------------------"]
             write_output(result_file, output, mode="a")
             logger.info(f"process completed in Host={host}, Input File={input_file_name},"
                         f" Dictionary File={dictionary_file}, OUTPUT File={result_file}, RESULT=Hash not Recovered")
         PROCESS_STATUS[host] = "Completed"
     except Exception as ex:
-        import traceback
-        traceback.print_exc()
         PROCESS_STATUS[host] = "Error"
         logger.error(f"error={str(ex)}")
     finalize(remote_directory, remote)

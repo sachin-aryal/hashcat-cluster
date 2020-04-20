@@ -19,14 +19,17 @@ def initialize(logger):
         os.mkdir("OUTPUT")
 
 
-def write_output(filename, output, mode="w"):
+def write_output(filename, out, mode="w"):
     """
     :param mode: Output File Mode
     :param filename: Output File Name
     :param output: Result of tail -n 19 from out.log created by hashcat command.
     It will removes extra next lines and spaces and write to output file. It will override the output file each time.
     """
-    out = "\n".join(x.strip() for x in output if len(x.strip()) > 0)
+    if mode == "w":
+        out = "\n".join(x.strip() for x in out if len(x.strip()) > 0)
+    else:
+        out = "\n".join(x for x in out)
     with open(os.path.join("OUTPUT", filename), mode) as fh:
         fh.write(out)
     return out
