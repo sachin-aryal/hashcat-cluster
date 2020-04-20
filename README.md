@@ -4,14 +4,14 @@
 
 ### Problem
 
-- We can have multiple servers available that are empty. 
+- We can have multiple servers available that are free. 
 - We need to run different hash file with different dictionary in those servers.
-- Its really troublesome to every time going to each server and executing starting the process.
+- Its really troublesome to every time going to each server and starting the process.
 
 ### Solution
 
 - We can create a input.json file as shown in the example below.
-- Then execute the command with the input.json file.
+- Then execute the command with the input.json file as argument.
 - The script will forward those files to each server, process and get the result.
 - This way we can get all the result in centralized location.
 
