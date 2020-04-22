@@ -70,11 +70,13 @@ We create input.json file such as
     output format of the hashcat command should not be changed.)
     - SSH KEY FILE PATH: SSH identity file path.
     - HASH INPUT FILE PATH: A single input hash file path.
+    - DICTIONARY FILE: User can provide the same dictionary for all the host, The script will split them and assign each 
+      host a part of the dictionary.
     
 2. ***hosts***:
     - This contains the list of nodes where hashcat process will run.<br>
-    - In each of the row inside ***hosts***, the **ip** and **dictionary** fields are mandatory. If other fields are missing then, 
-    It will update them from the global.
+    - In each of the row inside ***hosts***, only the **ip** field is mandatory and should be unique. If other fields 
+      are missing then, It will update them from the global.
     - We can also execute the commands in current machine, We just need to assign **CURRENT** in the **ip** field
 
 
@@ -108,3 +110,34 @@ We create input.json file such as
 - Result of every process will be inside the OUTPUT Folder.
 - The format of the result file is `{host}_{input_file_name}_{dictionary_file}.result`
 - The Result file contains the last 19 lines of log generated from the hashcat process and result of the hashcat process.
+
+
+### Example of same dictionary for all host.
+
+**In this type of input file, the dictionary file is splitted in 4 parts and each host get one part of that.**
+
+```json
+{
+  "global": {
+    "user": "predator",
+    "hashcat_command": "hashcat -a 0 -m 2500 --status --status-timer=20",
+    "ssh_key_filepath": "/Users/your_user/.ssh/id_rsa",
+    "input_file": "/Users/your_user/WifiAttack/Input/mywifi.hccapx",
+    "dictionary": "/Users/your_user/WifiAttack/WordList/BIG-WPA-LIST-1"
+  },
+  "hosts": [
+    {
+      "ip": "192.168.0.100"
+    },
+    {
+      "ip": "192.168.0.102"
+    },
+    {
+      "ip": "192.168.0.103"
+    },
+    {
+      "ip": "CURRENT"
+    }
+  ]
+}
+```

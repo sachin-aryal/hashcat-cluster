@@ -3,6 +3,12 @@ import sys
 import os
 import re
 import json
+import subprocess
+import shutil
+
+from shlex import split as shlex_split
+
+logger = logging.getLogger("Logger")
 
 
 def initialize(logger):
@@ -63,7 +69,19 @@ def is_file_exist(filepath):
     return False
 
 
-def check_if_all_fields_are_available(formatted_data):
+def split_files(dictionary_file, chunks):
+    temp_dir = f"temp_{os.path.basename(dictionary_file)}"
+    if os.path.exists(temp_dir):
+        shutil.rmtree(temp_dir)
+    os.mkdir(temp_dir)
+    os.chdir(temp_dir)
+    subprocess.Popen(shlex_split(f"gsplit -n {str(chunks)} {dictionary_file}")).communicate()
+    os.chdir("../")
+    return temp_dir
+
+
+def input_validation_and_finalization(formatted_data):
+    host_dictionary = {}
     for each_row in formatted_data:
         if None in each_row.values():
             raise Exception(f"Input error in row={each_row}")
@@ -74,6 +92,21 @@ def check_if_all_fields_are_available(formatted_data):
             raise Exception(f"dictionary file not found: {each_row['dictionary']} for host={each_row['host']}")
         if not is_file_exist(each_row["ssh_key_filepath"]):
             raise Exception(f"ssh_key_filepath file not found: {each_row['ssh_key_filepath']} for host={each_row['host']}")
+        entry = host_dictionary.get(each_row["dictionary"], [])
+        entry.append(each_row["host"])
+        host_dictionary[each_row["dictionary"]] = entry
+
+    host_dictionary_mapping = {}
+    same_dictionaries = {key: val for key, val in host_dictionary.items() if len(val) > 1}
+    for dictionary, hosts in same_dictionaries.items():
+        logger.info(f"split dictionary {dictionary} in {len(hosts)} parts.")
+        split_file_directory = split_files(dictionary, len(hosts))
+        file_list = os.listdir(split_file_directory)
+        for i, each_host in enumerate(hosts):
+            host_dictionary_mapping[each_host] = os.path.join(split_file_directory, file_list[i])
+    for each_row in formatted_data:
+        if each_row["host"] in host_dictionary_mapping:
+            each_row["dictionary"] = host_dictionary_mapping[each_row["host"]]
 
 
 def read_input_file(input_file):
@@ -83,16 +116,21 @@ def read_input_file(input_file):
     formatted_data = []
     global_data = data["global"]
     hosts = data["hosts"]
+    ip_list = []
     for each_host in hosts:
+        if each_host["ip"] in ip_list:
+            raise Exception(f"Duplicate host not allowed;ip={each_host['ip']}")
+        ip_list.append(each_host["ip"])
         formatted_data.append(
             {
                 "host": each_host["ip"],
                 "user": each_host.get("user") or global_data.get("user"),
                 "ssh_key_filepath": each_host.get("ssh_key_filepath") or global_data.get("ssh_key_filepath"),
                 "input_file": each_host.get("input_file") or global_data.get("input_file"),
-                "dictionary": each_host.get("dictionary"),
+                "dictionary": each_host.get("dictionary") or global_data.get("dictionary"),
                 "hashcat_command": each_host.get("hashcat_command") or global_data.get("hashcat_command"),
             }
         )
-    check_if_all_fields_are_available(formatted_data=formatted_data)
+    input_validation_and_finalization(formatted_data=formatted_data)
+    print(formatted_data)
     return formatted_data

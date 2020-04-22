@@ -2,14 +2,9 @@
 
 import uuid
 import time
-import subprocess
-from shlex import split as shlex_split
 from src.utils.client import RemoteClient
 from src.utils.helper import *
 from threading import Thread
-
-
-logger = logging.getLogger("Logger")
 
 PROCESS_STATUS = {}
 
