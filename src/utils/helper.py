@@ -75,7 +75,7 @@ def split_files(dictionary_file, chunks):
         shutil.rmtree(temp_dir)
     os.mkdir(temp_dir)
     os.chdir(temp_dir)
-    subprocess.Popen(shlex_split(f"gsplit -n {str(chunks)} {dictionary_file}")).communicate()
+    subprocess.Popen(shlex_split(f"split -n {str(chunks)} {dictionary_file}")).communicate()
     os.chdir("../")
     return temp_dir
 
