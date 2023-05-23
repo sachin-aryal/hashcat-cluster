@@ -61,7 +61,7 @@ To initiate the process, you need to create an `input.json` file with the desire
     }
   ]
 }
-
+```
 
 To start the process, execute the following command with the input.json file as an argument:
 
